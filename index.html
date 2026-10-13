@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arquitectura de Computadoras · Unidad 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#eef1f4;--grid:#d9e0e7;--ink:#101828;--mute:#516074;--card:#fff;--line:#c9d2dc;--hi:#ffc83d;--blue:#2f5bff;--on-hi:#101828;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0e1520;--grid:#17222f;--ink:#e8edf3;--mute:#9aa8ba;--card:#152030;--line:#26364a;--blue:#7b98ff}}
+:root[data-theme="dark"]{--paper:#0e1520;--grid:#17222f;--ink:#e8edf3;--mute:#9aa8ba;--card:#152030;--line:#26364a;--blue:#7b98ff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+body{margin:0;font:16px/1.65 "IBM Plex Sans",system-ui,sans-serif;color:var(--ink);background-color:var(--paper);
+background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+h1,h2,h3{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;line-height:1.1;margin:0}
+a{color:inherit}
+.wrap{display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;max-width:1120px;margin:0 auto;padding:0 24px}
+nav.side{position:sticky;top:0;align-self:start;padding:32px 0;height:100vh;overflow:auto}
+nav.side b{font-family:"Bricolage Grotesque",sans-serif;font-size:18px;display:block;margin-bottom:18px}
+nav.side a{display:block;text-decoration:none;color:var(--mute);padding:6px 0 6px 12px;border-left:3px solid var(--line);font-size:14.5px}
+nav.side a.on{color:var(--ink);border-color:var(--hi);font-weight:600}
+nav.side a span{color:var(--blue);margin-right:6px;font-variant-numeric:tabular-nums}
+main{padding:40px 0 80px;min-width:0}
+header.hero h1{font-size:clamp(40px,7vw,76px);font-weight:800;letter-spacing:-.02em}
+header.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--hi) 62%)}
+header.hero p{max-width:56ch;color:var(--mute);font-size:18px;margin:18px 0 28px}
+section{margin-top:72px}
+section>h2{font-size:clamp(28px,4vw,40px);font-weight:700;margin-bottom:8px}
+section>h2 small{font:500 15px "IBM Plex Sans";color:var(--blue);display:block;margin-bottom:6px}
+.lead{color:var(--mute);max-width:62ch;margin:0 0 22px}
+h3{font-size:21px;margin:30px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px 22px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.cols .card h3{margin-top:0;font-size:19px}
+.cols .card p{margin:6px 0 0}
+ul{padding-left:20px;margin:8px 0}
+li{margin:3px 0}
+code,.reg{font-family:ui-monospace,Menlo,Consolas,monospace}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--ink);color:var(--paper);font-weight:600}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+/* CPU simulator */
+.sim{background:var(--card);border:2px solid var(--ink);border-radius:8px;padding:20px;box-shadow:6px 6px 0 var(--hi)}
+.phases{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.phases span{padding:5px 14px;border:1.5px solid var(--line);border-radius:99px;font-size:14px;color:var(--mute)}
+.phases span.on{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:600}
+.regs{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.r{border:1.5px solid var(--line);border-radius:5px;padding:8px 10px;transition:background .25s,border-color .25s}
+.r small{display:block;color:var(--mute);font-size:12.5px}
+.r b{font:600 22px ui-monospace,Menlo,monospace;min-height:30px;display:block}
+.r.hot{background:var(--hi);border-color:var(--ink);color:var(--on-hi)}
+.r.hot small{color:var(--on-hi)}
+.msg{margin:16px 0;min-height:52px;font-size:16.5px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button,select,input[type=range]{font:inherit}
+button{cursor:pointer;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:8px 18px;border-radius:5px;font-weight:600}
+button.alt{background:transparent;color:var(--ink)}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.4;cursor:default}
+.count{color:var(--mute);font-size:14px}
+/* tabs */
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{background:transparent;color:var(--ink);border-color:var(--line)}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.diag{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;font-size:14px}
+.box{border:1.5px solid var(--ink);border-radius:4px;padding:6px 12px;background:var(--paper)}
+.arr{color:var(--blue);font-weight:700}
+/* memory hierarchy */
+.pyr{display:grid;gap:8px}
+.lv{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:center}
+.lv .bar{height:38px;border-radius:4px;display:flex;align-items:center;padding:0 12px;font-size:14px;font-weight:600;background:var(--blue);color:#fff;min-width:max-content}
+.lv small{color:var(--mute);display:block;font-weight:400}
+.calc{display:flex;gap:18px;flex-wrap:wrap;align-items:end}
+.calc label{display:block;font-size:14px;color:var(--mute)}
+.calc select,.calc input[type=number]{border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);padding:7px 10px;border-radius:5px;width:130px}
+.out{font:700 30px "Bricolage Grotesque";margin-top:14px}
+.out small{font:400 14px "IBM Plex Sans";color:var(--mute);display:block}
+.steps{counter-reset:s;list-style:none;padding:0;display:grid;gap:12px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:42px 1fr;gap:12px}
+.steps li::before{content:counter(s);width:42px;height:42px;border-radius:50%;background:var(--hi);color:var(--on-hi);display:grid;place-items:center;font:700 18px "Bricolage Grotesque"}
+footer{margin-top:80px;padding-top:24px;border-top:2px solid var(--ink);color:var(--mute);font-size:14.5px}
+@media (max-width:860px){
+.wrap{display:block;padding:0 18px}
+nav.side{position:sticky;height:auto;padding:10px 0;display:flex;gap:8px;overflow-x:auto;background:var(--paper);z-index:5;top:env(safe-area-inset-top,0px);border-bottom:1px solid var(--line)}
+nav.side b{display:none}
+nav.side a{white-space:nowrap;border:1px solid var(--line);border-radius:99px;padding:5px 12px}
+nav.side a.on{background:var(--hi);color:var(--on-hi);border-color:var(--ink)}
+.lv{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="side" aria-label="Índice">
+<b>Unidad 1</b>
+<a href="#modelos"><span>1.1</span>Modelos</a>
+<a href="#cpu"><span>1.2</span>CPU</a>
+<a href="#memoria"><span>1.2.2</span>Memoria</a>
+<a href="#es"><span>1.2.3</span>Entrada/Salida</a>
+<a href="#buses"><span>1.2.4</span>Buses</a>
+<a href="#interrupciones"><span>1.2.5</span>Interrupciones</a>
+<a href="#refs">Referencias</a>
+</nav>
+
+<main>
+<header class="hero">
+<h1>Arquitectura de <em>Computadoras</em></h1>
+<p>Unidad 1: cómo se organiza una computadora y cómo se comunican sus partes. Empieza por aquí: avanza paso a paso una suma de 5 + 3 dentro del procesador.</p>
+<div class="sim" id="sim" aria-live="polite">
+<div class="phases" id="phases"><span>Buscar</span><span>Decodificar</span><span>Ejecutar</span><span>Almacenar</span></div>
+<div class="regs">
+<div class="r" id="r-PC"><small>PC</small><b></b></div>
+<div class="r" id="r-MAR"><small>MAR</small><b></b></div>
+<div class="r" id="r-MBR"><small>MBR</small><b></b></div>
+<div class="r" id="r-AX"><small>AX</small><b></b></div>
+<div class="r" id="r-BX"><small>BX</small><b></b></div>
+<div class="r" id="r-ALU"><small>ALU</small><b></b></div>
+</div>
+<p class="msg" id="msg"></p>
+<div class="btns"><button id="next">Siguiente paso</button><button class="alt" id="reset">Reiniciar</button><span class="count" id="count"></span></div>
+</div>
+</header>
+
+<section id="modelos">
+<h2><small>1.1</small>Modelos de arquitectura</h2>
+<p class="lead">La arquitectura es el diseño conceptual de un sistema: define cómo se conectan el hardware y el software para procesar información. Busca rendimiento, escalabilidad y eficiencia.</p>
+<h3>1.1.1 Arquitecturas clásicas</h3>
+<div class="tabs" role="tablist">
+<button role="tab" aria-selected="true" data-t="vn">von Neumann</button>
+<button role="tab" aria-selected="false" data-t="hv">Harvard</button>
+</div>
+<div class="card" id="tabpanel"></div>
+<h3>Comparativa</h3>
+<div class="tbl"><table>
+<tr><th>Característica</th><th>von Neumann</th><th>Harvard</th></tr>
+<tr><td>Memoria</td><td>Única, para datos e instrucciones</td><td>Dos memorias físicamente separadas</td></tr>
+<tr><td>Buses</td><td>Un bus compartido</td><td>Buses independientes y paralelos</td></tr>
+<tr><td>Rendimiento</td><td>Limitado por el cuello de botella del bus</td><td>Mayor velocidad por acceso simultáneo</td></tr>
+<tr><td>Complejidad</td><td>Más simple y económica</td><td>Más compleja y optimizada</td></tr>
+<tr><td>Flexibilidad</td><td>Alta</td><td>Baja</td></tr>
+<tr><td>Se usa en</td><td>PCs y laptops (uso general)</td><td>Microcontroladores, DSP, sistemas embebidos</td></tr>
+</table></div>
+<h3>1.1.2 Segmentación (pipelining)</h3>
+<p>Divide la ejecución de una instrucción en etapas (búsqueda, decodificación, ejecución, escritura) y solapa varias instrucciones a la vez. Aumenta el rendimiento (<i>throughput</i>), pero pueden aparecer riesgos (<i>hazards</i>) de datos y de saltos que generan retrasos.</p>
+<h3>1.1.3 Multiprocesamiento</h3>
+<div class="cols">
+<div class="card"><h3>Definición</h3><p>Dos o más procesadores (núcleos) que ejecutan tareas en paralelo real y elevan la capacidad de cálculo.</p></div>
+<div class="card"><h3>Taxonomía de Flynn</h3><p><b>SIMD:</b> una instrucción, múltiples datos (procesamiento gráfico). <b>MIMD:</b> múltiples instrucciones y datos (estándar en PCs).</p></div>
+<div class="card"><h3>SMP vs NUMA</h3><p><b>SMP:</b> memoria compartida uniforme. <b>NUMA:</b> memoria distribuida con accesos locales rápidos y remotos más lentos.</p></div>
+</div>
+</section>
+
+<section id="cpu">
+<h2><small>1.2</small>La CPU por dentro</h2>
+<p class="lead">La unidad central de procesamiento ejecuta instrucciones, procesa datos y controla las operaciones del sistema.</p>
+<div class="cols">
+<div class="card"><h3>Unidad de control</h3><p>Coordina las operaciones.</p></div>
+<div class="card"><h3>ALU</h3><p>Realiza operaciones aritméticas (suma, resta, multiplicación, división), lógicas (AND, OR, NOT, XOR) y comparaciones (&gt;, &lt;, =). Ejemplo: 5 + 3 = 8; 1 AND 1 → 1; 1 OR 0 → 1.</p></div>
+<div class="card"><h3>Registros</h3><p>Memorias pequeñas dentro de la CPU. Más rápidos que la RAM, pero de poca capacidad.</p></div>
+</div>
+<h3>Registros principales</h3>
+<div class="tbl"><table>
+<tr><th>Registro</th><th>Qué guarda</th></tr>
+<tr><td>PC (contador de programa)</td><td>Dirección de la siguiente instrucción a ejecutar</td></tr>
+<tr><td>IR (registro de instrucción)</td><td>La instrucción que se está analizando o ejecutando</td></tr>
+<tr><td>EFLAGS / RFLAGS</td><td>Banderas (cero, desbordamiento, signo) sobre el resultado de la última operación</td></tr>
+<tr><td>MAR (dirección de memoria)</td><td>Dirección física de la próxima lectura o escritura</td></tr>
+<tr><td>MBR / MDR (datos de memoria)</td><td>Dato leído de memoria o listo para escribirse en ella</td></tr>
+</table></div>
+<h3>Ciclo de instrucción</h3>
+<p>Es el proceso que sigue la CPU para ejecutar una instrucción: <b>buscar</b>, <b>decodificar</b>, <b>ejecutar</b> y <b>almacenar</b>. Es el que recorre la simulación del inicio.</p>
+</section>
+
+<section id="memoria">
+<h2><small>1.2.2</small>Memoria</h2>
+<p class="lead">Cuanto más arriba en la jerarquía, más rápida y cara es la memoria, y menos capacidad tiene.</p>
+<div class="card pyr" role="img" aria-label="Jerarquía de memoria">
+<div class="lv"><div>Registros<small>&lt; 1 KB · &lt; 1 ns</small></div><div class="bar" style="width:22%">CPU</div></div>
+<div class="lv"><div>Caché<small>MB · ~1–10 ns</small></div><div class="bar" style="width:40%">L1, L2, L3</div></div>
+<div class="lv"><div>Memoria principal<small>8–64 GB · ~30–100 ns</small></div><div class="bar" style="width:58%">RAM</div></div>
+<div class="lv"><div>Secundaria<small>TB · ms</small></div><div class="bar" style="width:78%">SSD, HDD</div></div>
+<div class="lv"><div>Terciaria<small>PB · segundos</small></div><div class="bar" style="width:100%">Cintas, discos ópticos</div></div>
+</div>
+<h3>1.2.2.1 Conceptos básicos</h3>
+<ul>
+<li><b>Direccionamiento:</b> cada celda o byte tiene una dirección numérica única.</li>
+<li><b>Asignación (contigua o no contigua):</b> cómo se reparte la RAM entre los programas en ejecución.</li>
+<li><b>Protección:</b> impide que un programa lea o modifique la memoria de otro o del sistema operativo.</li>
+<li><b>Paginación y memoria virtual:</b> divide la memoria en páginas fijas y usa disco como RAM adicional cuando se agota.</li>
+</ul>
+<h3>1.2.2.2 y 1.2.2.3 RAM y caché</h3>
+<div class="tbl"><table>
+<tr><th></th><th>Memoria principal (RAM)</th><th>Memoria caché</th></tr>
+<tr><td>Rol</td><td>Puente entre el disco y la velocidad de la CPU</td><td>Anticipa los datos que la CPU va a necesitar</td></tr>
+<tr><td>Volatilidad</td><td>Volátil: se borra al apagar</td><td>Volátil</td></tr>
+<tr><td>Acceso</td><td>Aleatorio: cualquier posición directamente</td><td>Ultra directo, por bloques y niveles</td></tr>
+<tr><td>Estructura</td><td>Módulos en la tarjeta madre (8 GB, 16 GB…)</td><td>L1 pequeña y rápida; L2 intermedia; L3 mayor y compartida entre núcleos</td></tr>
+<tr><td>Principio</td><td>Mantiene activos el sistema y los programas en uso</td><td>Localidad temporal (se repetirá pronto) y espacial (se usarán los vecinos)</td></tr>
+</table></div>
+<p>La CPU busca un dato en L1; si no está, en L2, luego en L3 y por último en la RAM. El dato encontrado se copia a la caché para futuros accesos.</p>
+</section>
+
+<section id="es">
+<h2><small>1.2.3</small>Entrada/Salida</h2>
+<p class="lead">Son los mecanismos con los que la computadora intercambia información con teclado, mouse, impresora, disco y pantalla. Los <b>módulos de E/S</b> actúan como intermediarios entre CPU, memoria y dispositivos: controlan el dispositivo, usan <i>buffers</i>, detectan errores y ajustan velocidades.</p>
+<div class="tbl"><table>
+<tr><th>Método</th><th>Cómo funciona</th><th>Ventaja / problema</th></tr>
+<tr><td>1.2.3.2 Programada</td><td>La CPU pregunta una y otra vez si el dispositivo está listo.</td><td>Sencilla, pero la CPU pierde tiempo esperando.</td></tr>
+<tr><td>1.2.3.3 Por interrupciones</td><td>La CPU sigue con otras tareas; el dispositivo avisa cuando termina.</td><td>Mejor aprovechamiento de la CPU; atiende varios dispositivos.</td></tr>
+<tr><td>1.2.3.4 Acceso directo a memoria (DMA)</td><td>La CPU configura la transferencia; el controlador DMA mueve los datos entre dispositivo y RAM y avisa con una interrupción.</td><td>Menos carga para la CPU y más velocidad. Se usa en discos, SSD, red y audio.</td></tr>
+<tr><td>1.2.3.5 Canales y procesadores de E/S</td><td>La CPU asigna la tarea; un circuito o procesador dedicado la ejecuta y avisa al terminar.</td><td>Gestiona varios periféricos y reduce el trabajo de la CPU.</td></tr>
+</table></div>
+<p>Tu computadora ya tiene varios procesadores además de la CPU: el controlador USB, la tarjeta de red, la GPU y hasta un SSD NVMe, que puede tener procesador, RAM y sistema propios.</p>
+</section>
+
+<section id="buses">
+<h2><small>1.2.4</small>Buses</h2>
+<p class="lead">Un bus es un conjunto de líneas físicas y protocolos que conectan CPU, memoria y dispositivos de E/S para transferir datos, direcciones y señales de control.</p>
+<h3>1.2.4.1 Tipos</h3>
+<div class="cols">
+<div class="card"><h3>Datos</h3><p>Bidireccional. Lleva la información entre CPU, memoria y E/S. Ancho típico: 32 o 64 bits.</p></div>
+<div class="card"><h3>Direcciones</h3><p>Unidireccional, sale de la CPU. Indica dónde está la información (A0–A31 en 32 bits).</p></div>
+<div class="card"><h3>Control</h3><p>Coordina y sincroniza con señales como READ, WRITE, INTERRUPT, CLOCK y RESET.</p></div>
+</div>
+<h3>Transmisión: paralela y serial</h3>
+<div class="cols">
+<div class="card"><h3>Paralela</h3><p>Varios bits a la vez por líneas separadas. Rápida en distancias cortas, pero necesita más líneas y sufre interferencias (<i>skew</i>). Ejemplo: PCI heredado.</p></div>
+<div class="card"><h3>Serial</h3><p>Un bit tras otro por una línea o par diferencial. Menos conductores, más robusta y más veloz a frecuencias altas. Ejemplos: PCIe, USB, SATA.</p></div>
+</div>
+<h3>1.2.4.2 Rendimiento: calcula el ancho de banda</h3>
+<div class="card">
+<p style="margin-top:0">Ancho de banda = ancho del bus × frecuencia. Cambia los valores.</p>
+<div class="calc">
+<div><label for="w">Ancho (bits)</label><select id="w"><option>8</option><option>16</option><option>32</option><option selected>64</option><option>128</option></select></div>
+<div><label for="f">Frecuencia (MHz)</label><input type="number" id="f" value="133" min="1" max="10000"></div>
+</div>
+<div class="out" id="bw"></div>
+</div>
+<p>El arbitraje decide quién usa el bus cuando varios dispositivos lo piden (centralizado o distribuido). La temporización puede ser sincrónica (por reloj) o asincrónica (<i>handshaking</i>). El maestro inicia la transferencia y el esclavo responde: la CPU suele ser maestro y la memoria esclavo.</p>
+<h3>1.2.4.3 Jerarquía de buses</h3>
+<div class="tbl"><table>
+<tr><th>Nivel</th><th>Conecta</th><th>Velocidad y distancia</th><th>Ejemplos</th></tr>
+<tr><td>Bus local</td><td>CPU con caché L1/L2</td><td>Muy alta (GHz), milímetros</td><td>FSB, HyperTransport, QPI</td></tr>
+<tr><td>Bus del sistema</td><td>CPU, RAM y chipset</td><td>Alta, centímetros</td><td>Bus de memoria DDR4/DDR5</td></tr>
+<tr><td>Bus de expansión</td><td>Periféricos y E/S</td><td>Menor, hasta metros</td><td>PCI, PCIe, USB, SATA</td></tr>
+</table></div>
+</section>
+
+<section id="interrupciones">
+<h2><small>1.2.5</small>Interrupciones</h2>
+<p class="lead">Una interrupción es una señal que suspende el programa en curso para atender un evento prioritario. Luego la CPU retoma la tarea exactamente donde estaba, sin perder información.</p>
+<h3>Ciclo de atención</h3>
+<ol class="steps">
+<li><div><b>Petición.</b> Un dispositivo o evento genera una señal IRQ. La CPU la detecta al terminar la instrucción en curso y revisa la máscara de interrupciones.</div></li>
+<li><div><b>Suspensión y guardado de contexto.</b> Guarda en la pila el PC, los registros y las banderas.</div></li>
+<li><div><b>Ejecución de la ISR y retorno.</b> Corre la rutina de servicio. Al terminar restaura registros y PC, y sigue el programa interrumpido.</div></li>
+</ol>
+<h3>Fuentes de interrupción</h3>
+<div class="cols">
+<div class="card"><h3>Hardware</h3><p>Señales externas del teclado, disco o red.</p></div>
+<div class="card"><h3>Software</h3><p>Instrucciones INT de programas (llamadas al sistema).</p></div>
+<div class="card"><h3>Excepciones</h3><p>Errores internos: división por cero, fallo de página, instrucción ilegal.</p></div>
+</div>
+<h3>Interrupciones vs sondeo (polling)</h3>
+<div class="tbl"><table>
+<tr><th></th><th>Interrupciones</th><th>Sondeo</th></tr>
+<tr><td>CPU</td><td>Se detiene solo cuando ocurre un evento real</td><td>Consulta el estado del dispositivo todo el tiempo</td></tr>
+<tr><td>Eficiencia</td><td>Alta; ideal para multitarea y tiempo real</td><td>Baja; solo aceptable para dispositivos muy frecuentes</td></tr>
+<tr><td>Implementación</td><td>Más elaborada</td><td>Más sencilla</td></tr>
+</table></div>
+<p>Un mayor ancho de banda en el bus reduce la latencia de atención y mejora el rendimiento del sistema.</p>
+</section>
+
+<section id="refs">
+<h2>Referencias</h2>
+<ul>
+<li>Patterson y Hennessy, <i>Computer Organization and Design</i>.</li>
+<li>Stallings, W., <i>Computer Organization and Architecture</i>, 10.ª ed.</li>
+<li>Tanenbaum, A., <i>Structured Computer Organization</i>, 6.ª ed.</li>
+<li>Hamacher, Vranesic y Zaky, <i>Computer Organization</i>, 5.ª ed.</li>
+<li>PCI-SIG, PCI Express Base Specification (pcisig.com); USB Implementers Forum (usb.org); SATA-IO (sata-io.org); Intel 64 and IA-32 Architectures Software Developer Manuals.</li>
+</ul>
+</section>
+<footer>Material de la Unidad 1 · Arquitectura de Computadoras</footer>
+</main>
+</div>
+
+<script>
+// Simulador de ciclo de instrucción (5 + 3)
+var S=[
+{p:0,h:["PC"],m:"El PC apunta a la dirección del primer dato (5).",v:{PC:"0x10"}},
+{p:0,h:["MAR"],m:"El PC pasa la dirección al MAR, que la pone en el bus de direcciones.",v:{PC:"0x10",MAR:"0x10"}},
+{p:0,h:["MBR"],m:"La RAM responde por el bus de datos: el número 5 llega al MBR.",v:{PC:"0x11",MAR:"0x10",MBR:"5"}},
+{p:1,h:["AX"],m:"La unidad de control decodifica la instrucción y manda el 5 al registro AX.",v:{PC:"0x11",MAR:"0x10",MBR:"5",AX:"5"}},
+{p:0,h:["BX"],m:"Se repite el proceso para el segundo operando: el 3 se carga en BX.",v:{PC:"0x12",MAR:"0x11",MBR:"3",AX:"5",BX:"3"}},
+{p:2,h:["ALU"],m:"La ALU suma el contenido de AX (5) y BX (3).",v:{PC:"0x12",MAR:"0x11",MBR:"3",AX:"5",BX:"3",ALU:"8"}},
+{p:3,h:["AX"],m:"El resultado, 8, se guarda en AX. Desde ahí puede usarse o volver a la RAM.",v:{PC:"0x12",MAR:"0x11",MBR:"3",AX:"8",BX:"3",ALU:"8"}}
+];
+var i=-1,ids=["PC","MAR","MBR","AX","BX","ALU"];
+function draw(){
+ var s=S[i]||{p:-1,h:[],m:"Pulsa «Siguiente paso» para empezar.",v:{}};
+ ids.forEach(function(k){var e=document.getElementById("r-"+k);e.querySelector("b").textContent=s.v[k]||"";e.classList.toggle("hot",s.h.indexOf(k)>-1)});
+ document.querySelectorAll("#phases span").forEach(function(e,n){e.classList.toggle("on",n===s.p)});
+ document.getElementById("msg").textContent=s.m;
+ document.getElementById("count").textContent=i<0?"":"Paso "+(i+1)+" de "+S.length;
+ document.getElementById("next").disabled=i>=S.length-1;
+}
+document.getElementById("next").onclick=function(){if(i<S.length-1){i++;draw()}};
+document.getElementById("reset").onclick=function(){i=-1;draw()};
+draw();
+// Pestañas von Neumann / Harvard
+var T={
+vn:"<h3 style='margin-top:0'>von Neumann</h3><ul><li><b>CPU:</b> contiene la ALU y la unidad de control.</li><li><b>Memoria unificada:</b> datos e instrucciones en el mismo bloque físico.</li><li><b>E/S:</b> dispositivos de comunicación externa.</li></ul><p><b>Cuello de botella:</b> usa un bus único compartido, así que la CPU no puede leer un dato y buscar una instrucción al mismo tiempo.</p><div class='diag'><span class='box'>CPU</span><span class='arr'>⇄</span><span class='box'>Memoria única</span><span class='arr'>⇄</span><span class='box'>E/S</span></div>",
+hv:"<h3 style='margin-top:0'>Harvard</h3><p>Nació con la computadora Harvard Mark I. Separa por completo el almacenamiento y los buses de las <b>instrucciones</b> y de los <b>datos</b>.</p><ul><li>Permite accesos simultáneos a ambas memorias.</li><li>Elimina el cuello de botella de von Neumann.</li><li>Muy usada en microcontroladores modernos y DSP.</li></ul><div class='diag'><span class='box'>Mem. instrucciones</span><span class='arr'>⇄</span><span class='box'>CPU</span><span class='arr'>⇄</span><span class='box'>Mem. datos</span></div>"};
+var tb=document.querySelectorAll(".tabs button");
+function tab(k){document.getElementById("tabpanel").innerHTML=T[k];tb.forEach(function(b){b.setAttribute("aria-selected",b.dataset.t===k)})}
+tb.forEach(function(b){b.onclick=function(){tab(b.dataset.t)}});tab("vn");
+// Calculadora de ancho de banda
+function bw(){var w=+document.getElementById("w").value,f=+document.getElementById("f").value||0,mb=w/8*f;
+ document.getElementById("bw").innerHTML=(mb>=1000?(mb/1000).toFixed(2)+" GB/s":mb.toFixed(0)+" MB/s")+"<small>"+w+" bits ÷ 8 × "+f+" MHz</small>"}
+document.getElementById("w").onchange=bw;document.getElementById("f").oninput=bw;bw();
+// Índice activo
+var links=document.querySelectorAll("nav.side a");
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id)})}})},{rootMargin:"-30% 0px -60% 0px"});
+document.querySelectorAll("section").forEach(function(s){io.observe(s)});
+</script>
+</body>
+</html>
